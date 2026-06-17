@@ -5,12 +5,12 @@
     "build": "react-router build",
     "dev": "shopify app dev",
     "vercel-build": "prisma generate && prisma migrate deploy && react-router build",
-    "config:link": "shopify app config link",
+    "start": "react-router-serve ./build/server/index.js",
     "generate": "shopify app generate",
     "deploy": "shopify app deploy",
+    "config:link": "shopify app config link",
     "config:use": "shopify app config use",
     "env": "shopify app env",
-    "start": "react-router-serve ./build/server/index.js",
     "docker-start": "npm run setup && npm run start",
     "setup": "prisma generate && prisma migrate deploy",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
@@ -18,6 +18,8 @@
     "prisma": "prisma",
     "graphql-codegen": "graphql-codegen",
     "vite": "vite",
+    "typecheck": "react-router typegen && tsc --noEmit"
+  },
     "typecheck": "react-router typegen && tsc --noEmit"
   },
   "type": "module",
