@@ -152,6 +152,7 @@ function EnableForm({ product, onCancel }: { product: ShopifyProduct; onCancel: 
     maxDiscount: 20, concessionStep: 2, maxRounds: 3, dealExpiryMins: 30,
   });
   const busy = fetcher.state !== "idle";
+  const error = fetcher.data?.error;
 
   // Auto-close after successful submit
   useEffect(() => {
@@ -162,18 +163,31 @@ function EnableForm({ product, onCancel }: { product: ShopifyProduct; onCancel: 
 
   function set(key: string, v: number) { setVals((p) => ({ ...p, [key]: v })); }
 
+  function handleSubmit() {
+    const formData = new FormData();
+    formData.set("intent", "enable");
+    formData.set("productId", product.id);
+    formData.set("productTitle", product.title);
+    Object.entries(vals).forEach(([k, v]) => formData.set(k, String(v)));
+    fetcher.submit(formData, { method: "POST", action: "/app/products" });
+  }
+
   return (
     <div style={{ marginTop: 12, background: "#f6f6f7", borderRadius: 8, padding: "14px 16px", border: "1px solid #e1e3e5" }}>
       <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: 13 }}>Configure bargaining rules for <em>{product.title}</em></p>
 
+      {error && (
+        <p style={{ color: "#d72c0d", fontSize: 12, marginBottom: 8 }}>Error: {error}</p>
+      )}
+
       <div style={formGrid}>
         {[
-          { key: "minQuantity",     label: "Min Qty",          min: 1,  max: 9999, step: 1 },
-          { key: "triggerQuantity", label: "Trigger Qty",      min: 1,  max: 9999, step: 1 },
-          { key: "openingDiscount", label: "Opening Disc. (%)", min: 0,  max: 100,  step: 0.5 },
-          { key: "maxDiscount",     label: "Max Discount (%)",  min: 0,  max: 100,  step: 0.5 },
-          { key: "concessionStep",  label: "Concession (%)",    min: 0,  max: 50,   step: 0.5 },
-          { key: "maxRounds",       label: "Max Rounds",        min: 1,  max: 10,   step: 1 },
+          { key: "minQuantity",     label: "Min Qty",           min: 1,  max: 9999, step: 1 },
+          { key: "triggerQuantity", label: "Trigger Qty",       min: 1,  max: 9999, step: 1 },
+          { key: "openingDiscount", label: "Opening Disc. (%)",  min: 0,  max: 100,  step: 0.5 },
+          { key: "maxDiscount",     label: "Max Discount (%)",   min: 0,  max: 100,  step: 0.5 },
+          { key: "concessionStep",  label: "Concession (%)",     min: 0,  max: 50,   step: 0.5 },
+          { key: "maxRounds",       label: "Max Rounds",         min: 1,  max: 10,   step: 1 },
         ].map((f) => (
           <div key={f.key}>
             <label style={labelSt}>{f.label}</label>
@@ -189,18 +203,7 @@ function EnableForm({ product, onCancel }: { product: ShopifyProduct; onCancel: 
       </div>
 
       <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-        <button
-          style={btnPrimary}
-          disabled={busy}
-          onClick={() => {
-            fetcher.submit({
-              intent: "enable",
-              productId: product.id,
-              productTitle: product.title,
-              ...Object.fromEntries(Object.entries(vals).map(([k, v]) => [k, String(v)])),
-            }, { method: "POST" });
-          }}
-        >
+        <button style={btnPrimary} disabled={busy} onClick={handleSubmit}>
           {busy ? "Enabling…" : "Enable Bargaining"}
         </button>
         <button style={btnSecondary} onClick={onCancel}>Cancel</button>
@@ -219,13 +222,16 @@ export default function ProductsPage() {
   function handleToggle(ruleId: number, current: boolean) {
     fetcher.submit(
       { intent: "toggle", ruleId: String(ruleId), enabled: String(!current) },
-      { method: "POST" }
+      { method: "POST", action: "/app/products" }
     );
   }
 
   function handleDelete(ruleId: number) {
     if (confirm("Remove bargaining rules for this product?")) {
-      fetcher.submit({ intent: "delete", ruleId: String(ruleId) }, { method: "POST" });
+      fetcher.submit(
+        { intent: "delete", ruleId: String(ruleId) },
+        { method: "POST", action: "/app/products" }
+      );
     }
   }
 
