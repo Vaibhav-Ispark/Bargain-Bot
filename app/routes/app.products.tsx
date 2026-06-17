@@ -5,7 +5,7 @@ import type {
   LoaderFunctionArgs,
 } from "react-router";
 import { Form, useFetcher, useLoaderData } from "react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
@@ -152,6 +152,13 @@ function EnableForm({ product, onCancel }: { product: ShopifyProduct; onCancel: 
     maxDiscount: 20, concessionStep: 2, maxRounds: 3, dealExpiryMins: 30,
   });
   const busy = fetcher.state !== "idle";
+
+  // Auto-close after successful submit
+  useEffect(() => {
+    if (fetcher.state === "idle" && fetcher.data?.ok) {
+      onCancel();
+    }
+  }, [fetcher.state, fetcher.data]);
 
   function set(key: string, v: number) { setVals((p) => ({ ...p, [key]: v })); }
 
