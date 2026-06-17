@@ -1,9 +1,15 @@
-import { createRequestHandler } from "@react-router/node";
-
-// Import the server build
+// Vercel serverless function — wraps the React Router Node.js server
+const { createRequestHandler } = await import("@react-router/node");
 const build = await import("../build/server/index.js");
 
-export default createRequestHandler({
-  build,
-  mode: process.env.NODE_ENV,
-});
+const handler = createRequestHandler({ build });
+
+export default async function (req, res) {
+  try {
+    await handler(req, res);
+  } catch (err) {
+    console.error("BargainBot server error:", err);
+    res.statusCode = 500;
+    res.end("Internal Server Error");
+  }
+}

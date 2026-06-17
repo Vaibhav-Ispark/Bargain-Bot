@@ -4,7 +4,8 @@
   "framework": null,
   "functions": {
     "api/index.js": {
-      "includeFiles": "build/**"
+      "includeFiles": "build/**",
+      "maxDuration": 30
     }
   },
   "rewrites": [
