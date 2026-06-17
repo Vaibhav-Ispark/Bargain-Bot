@@ -20,8 +20,6 @@
     "vite": "vite",
     "typecheck": "react-router typegen && tsc --noEmit"
   },
-    "typecheck": "react-router typegen && tsc --noEmit"
-  },
   "type": "module",
   "engines": {
     "node": ">=20.19 <22 || >=22.12"
