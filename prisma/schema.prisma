@@ -7,8 +7,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  // For local dev with SQLite, override in .env:
-  // DATABASE_URL="file:dev.sqlite"
+  directUrl = env("DIRECT_URL")
 }
 
 // ─── Shopify session storage ───────────────────────────────────────────────
