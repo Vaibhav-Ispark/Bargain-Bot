@@ -299,7 +299,7 @@ export default function ProductsPage() {
                           style={btnPrimary}
                           onClick={() => setExpandedId(showEnableForm ? null : product.id)}
                         >
-                          {showEnableForm ? "✕ Cancel" : "🤝 Enable Bargaining"}
+                          {showEnableForm ? "✕ Cancel" : "Enable Bargaining"}
                         </button>
                       )}
                     </div>

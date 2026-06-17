@@ -581,8 +581,21 @@
     if (btn) {
       var vid = getVariantId();
       btn.onclick = function () {
+        // Upsell: ask once if they want more units before checkout
+        var currentQty = qty;
+        var wantMore = confirm(
+          "Before you go — would you like to add more units at your discounted price?\n\n" +
+          "Current deal: " + qty + " units at " + code + "\n\n" +
+          "Click OK to increase quantity, or Cancel to proceed to checkout."
+        );
+        if (wantMore) {
+          var newQty = parseInt(prompt("How many units would you like? (Current: " + qty + ")", qty) || qty, 10);
+          if (newQty && newQty > qty) {
+            currentQty = newQty;
+          }
+        }
         window.location.href = vid
-          ? "/cart/" + vid + ":" + qty + "?discount=" + encodeURIComponent(code)
+          ? "/cart/" + vid + ":" + currentQty + "?discount=" + encodeURIComponent(code)
           : "/checkout?discount=" + encodeURIComponent(code);
       };
     }
