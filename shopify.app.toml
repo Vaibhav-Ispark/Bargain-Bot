@@ -1,9 +1,8 @@
 # BargainBot — Shopify App Configuration
-# https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "35955a16279cc26f320c8a9d3d422097"
 name = "BargainBot"
-application_url = "https://recall-wyoming-essentially-wifi.trycloudflare.com"
+application_url = "https://bargain-bot.vercel.app"
 embedded = true
 
 [build]
@@ -25,12 +24,12 @@ scopes = "read_products,write_products,read_orders,write_discounts"
 
 [auth]
 redirect_urls = [
-  "https://recall-wyoming-essentially-wifi.trycloudflare.com/auth/callback",
-  "https://recall-wyoming-essentially-wifi.trycloudflare.com/auth/shopify/callback",
-  "https://recall-wyoming-essentially-wifi.trycloudflare.com/api/auth/callback"
+  "https://bargain-bot.vercel.app/auth/callback",
+  "https://bargain-bot.vercel.app/auth/shopify/callback",
+  "https://bargain-bot.vercel.app/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://recall-wyoming-essentially-wifi.trycloudflare.com/app-proxy"
+url = "https://bargain-bot.vercel.app/app-proxy"
 prefix = "apps"
 subpath = "bargainbot"
