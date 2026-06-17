@@ -1,15 +1,19 @@
-// Vercel serverless function — wraps the React Router Node.js server
-const { createRequestHandler } = await import("@react-router/node");
-const build = await import("../build/server/index.js");
+// Vercel serverless entry — bridges Node.js http to React Router's fetch-based handler
+import { createRequestHandler } from "@react-router/node";
 
-const handler = createRequestHandler({ build });
+let handler;
 
 export default async function (req, res) {
   try {
-    await handler(req, res);
-  } catch (err) {
-    console.error("BargainBot server error:", err);
+    if (!handler) {
+      const build = await import("../build/server/index.js");
+      handler = createRequestHandler({ build, mode: "production" });
+    }
+    return handler(req, res);
+  } catch (error) {
+    console.error("[BargainBot] Serverless function error:", error);
     res.statusCode = 500;
-    res.end("Internal Server Error");
+    res.setHeader("Content-Type", "text/plain");
+    res.end("Internal Server Error: " + error.message);
   }
 }
