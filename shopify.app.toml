@@ -1,0 +1,36 @@
+# BargainBot — Shopify App Configuration
+# https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "35955a16279cc26f320c8a9d3d422097"
+name = "BargainBot"
+application_url = "https://recall-wyoming-essentially-wifi.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+
+[webhooks]
+api_version = "2026-07"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/scopes_update" ]
+  uri = "/webhooks/app/scopes_update"
+
+[access_scopes]
+scopes = "read_products,write_products,read_orders,write_discounts"
+
+[auth]
+redirect_urls = [
+  "https://recall-wyoming-essentially-wifi.trycloudflare.com/auth/callback",
+  "https://recall-wyoming-essentially-wifi.trycloudflare.com/auth/shopify/callback",
+  "https://recall-wyoming-essentially-wifi.trycloudflare.com/api/auth/callback"
+]
+
+[app_proxy]
+url = "https://recall-wyoming-essentially-wifi.trycloudflare.com/app-proxy"
+prefix = "apps"
+subpath = "bargainbot"

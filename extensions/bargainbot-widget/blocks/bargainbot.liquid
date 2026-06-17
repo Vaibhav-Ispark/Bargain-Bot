@@ -1,0 +1,91 @@
+{% comment %}
+  BargainBot Chat Widget — App Embed Block
+  Target: body — add once from Theme Customizer > App Embeds.
+{% endcomment %}
+
+{% if block.settings.enabled %}
+
+  {% if product %}
+    {{- 'bargainbot.css' | asset_url | stylesheet_tag -}}
+  {% endif %}
+
+  <div
+    id="bargainbot-root"
+    data-shop="{{ shop.permanent_domain }}"
+    data-product-id="{{ product.id | prepend: 'gid://shopify/Product/' }}"
+    data-product-title="{{ product.title | escape }}"
+    {{ block.shopify_attributes }}
+  ></div>
+
+  <script>
+    window.BargainBotConfig = {
+      shop:             "{{ shop.permanent_domain }}",
+      productId:        "gid://shopify/Product/{{ product.id }}",
+      productTitle:     {{ product.title | json }},
+      position:         "{{ block.settings.position }}",
+      {%- comment -%}
+        app.url = the tunnel/production URL of the app backend.
+        Widget calls this directly (no HMAC needed — routes handle CORS themselves).
+      {%- endcomment -%}
+      appUrl:           "{{ app.url | remove_last: '/' }}",
+      proactiveTrigger: {{ block.settings.proactive_trigger }},
+      proactiveDelay:   {{ block.settings.proactive_delay }},
+      proactiveMessage: {{ block.settings.proactive_message | json }}
+    };
+  </script>
+  <script src="{{ 'bargainbot.js' | asset_url }}" defer></script>
+
+{% endif %}
+
+{% schema %}
+{
+  "name": "BargainBot",
+  "target": "body",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable BargainBot",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Widget Position",
+      "default": "bottom-right",
+      "options": [
+        { "value": "bottom-right", "label": "Bottom Right" },
+        { "value": "bottom-left",  "label": "Bottom Left"  }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Proactive Trigger"
+    },
+    {
+      "type": "checkbox",
+      "id": "proactive_trigger",
+      "label": "Enable Proactive Trigger",
+      "default": true,
+      "info": "Automatically prompt the customer after they spend time on the page"
+    },
+    {
+      "type": "range",
+      "id": "proactive_delay",
+      "label": "Trigger Delay (seconds)",
+      "default": 30,
+      "min": 5,
+      "max": 120,
+      "step": 5,
+      "unit": "s"
+    },
+    {
+      "type": "text",
+      "id": "proactive_message",
+      "label": "Trigger Message",
+      "default": "Psst — want a deal? 👀",
+      "info": "Message shown in the tooltip bubble"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,138 @@
+// BargainBot Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+// ─── Shopify session storage ───────────────────────────────────────────────
+
+model Session {
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+// ─── BargainBot domain models ──────────────────────────────────────────────
+
+/// Per-merchant chat widget appearance and behaviour
+model WidgetSettings {
+  id                Int      @id @default(autoincrement())
+  shop              String   @unique
+  botName           String   @default("BargainBot")
+  primaryColor      String   @default("#008060")
+  tone              String   @default("friendly")
+  position          String   @default("bottom-right")
+  greeting          String   @default("Hey! Want to make a deal? Tell me how many you'd like and we'll see what we can do 🤝")
+  logoUrl           String   @default("")
+  // BUG-43: proactive trigger settings stored in DB not just Liquid block
+  proactiveTrigger  Boolean  @default(true)
+  proactiveDelay    Int      @default(30)
+  proactiveMessage  String   @default("Psst — want a deal? 👀")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+/// Bargaining rules configured by the merchant for a specific product
+model ProductRule {
+  id               Int              @id @default(autoincrement())
+  shop             String
+  productId        String
+  productTitle     String
+  enabled          Boolean          @default(true)
+  minQuantity      Int              @default(1)
+  triggerQuantity  Int              @default(1)
+  openingDiscount  Float            @default(5)
+  maxDiscount      Float            @default(20)
+  concessionStep   Float            @default(2)
+  maxRounds        Int              @default(3)
+  dealExpiryMins   Int              @default(30)
+  tiers            QuantityTier[]
+  sessions         BargainSession[]
+  deals            Deal[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@unique([shop, productId])
+  @@index([shop])
+}
+
+/// Optional quantity-based discount tiers for a product rule
+model QuantityTier {
+  id            Int         @id @default(autoincrement())
+  productRuleId Int
+  productRule   ProductRule @relation(fields: [productRuleId], references: [id], onDelete: Cascade)
+  minQty        Int
+  discount      Float
+}
+
+/// One row per customer bargaining session
+model BargainSession {
+  id                 Int          @id @default(autoincrement())
+  shop               String
+  productRuleId      Int
+  productRule        ProductRule  @relation(fields: [productRuleId], references: [id], onDelete: Cascade)
+  customerId         String?
+  customerEmail      String?
+  status             String       @default("active")
+  currentRound       Int          @default(0)
+  currentDiscount    Float        @default(0)
+  agreedQty          Int?
+  agreedDiscount     Float        @default(0)   // BUG-42: non-nullable, default 0
+  lastQty            Int?
+  usedResponseIds    String       @default("[]")
+  transcript         String       @default("[]")
+  // Price Sensitivity Prediction
+  sensitivityScore   Float        @default(50)
+  rejectionCount     Int          @default(0)
+  highDiscountAsked  Float        @default(0)
+  lastMsgAt          DateTime?
+  startedAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  deal               Deal?
+
+  @@index([shop])           // BUG-41: index for analytics queries
+  @@index([shop, status])
+}
+
+/// Closed deals with discount codes
+model Deal {
+  id             Int            @id @default(autoincrement())
+  shop           String
+  sessionId      Int            @unique
+  session        BargainSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  productRuleId  Int
+  productRule    ProductRule    @relation(fields: [productRuleId], references: [id], onDelete: Cascade)
+  productId      String
+  finalQty       Int
+  finalDiscount  Float
+  discountCode   String
+  discountNodeId String         @default("")   // BUG-18: renamed from priceRuleId for clarity
+  priceRuleId    String         @default("")   // kept for backwards compat
+  expiresAt      DateTime
+  converted      Boolean        @default(false)
+  shopifyOrderId String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([shop])           // BUG-41: index for analytics queries
+  @@index([shop, converted])
+}

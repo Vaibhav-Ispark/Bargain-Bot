@@ -1,0 +1,8 @@
+{
+  "bargainbot": {
+    "launcher_label": "Open BargainBot chat",
+    "close_label": "Close chat",
+    "input_placeholder": "Type a quantity or message…",
+    "send_label": "Send message"
+  }
+}
