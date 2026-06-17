@@ -1,6 +1,7 @@
 {
   "buildCommand": "npm run vercel-build",
   "installCommand": "npm install",
+  "outputDirectory": "build/client",
   "framework": null,
   "functions": {
     "api/index.js": {
@@ -8,17 +9,10 @@
       "maxDuration": 30
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/build/client/(.*)",
-      "dest": "/build/client/$1"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api/index"
+      "source": "/((?!assets/).*)",
+      "destination": "/api/index"
     }
   ]
 }
